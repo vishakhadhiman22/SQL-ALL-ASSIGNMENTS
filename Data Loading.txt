@@ -1,0 +1,99 @@
+Q1. Data Understanding
+
+Identify all data quality issues present in the dataset. 
+
+Looking at this table, it’s a classic example of "dirty data". Here is what’s broken:
+Redundancy: We have a duplicate entry for Order_ID 0101.
+Missing Info: There are "Null" values and empty spots in the Customer_ID and Sales_Amount columns.
+Bad Formatting: The Sales_Amount column has text ("Three Thousand") instead of numbers.
+Date Chaos: Some dates use dashes (12-01-2024) while others use slashes (2024/01/18).
+Structural Mess: The first two rows look like they were imported badly, with values shifted or separated by extra commas.
+
+
+Q2. Primary Key Validation
+
+Is Order_ID a valid Primary Key here? 
+
+a) Violation: Yes, the dataset definitely violates the Primary Key rule. A Primary Key has to be unique, and we have a repeat.
+b) The Culprit: Order_ID 0101 is listed twice (once at the top and again in the middle).
+
+
+Q3.
+Missing Value Analysis 
+
+Affected Columns: Customer_ID and Sales_Amount.
+
+a) Affected Records: Order_ID 0101 (first instance) is missing the Customer_ID, and Order_ID 0102 has a "Null" Sales_Amount.
+b) The Risk: If we load these as-is, our financial reports will be wrong. Most databases will either reject the whole file or, worse, skip the math for those rows, giving us a "Total Sales" figure that’s lower than reality.
+
+Q4.
+Data Type Validation 
+a) Failure Records: Order_ID 0104 will fail because "Three Thousand" is a string, not a number. Order_ID 0102 might also fail if "Null" is treated as text.
+
+b) SQL Result: If the table is set to DECIMAL, the database will throw a "Data Type Mismatch" error and stop the load entirely. It can't turn "Three" into "3" automatically.
+
+Q5.
+Date Format Consistency 
+
+a) Formats Found: We have DD-MM-YYYY (like 12-01-2024) and YYYY/MM/DD (like 2024/01/18).
+
+b) The Problem: Databases are picky. If it expects YYYY-MM-DD and gets 12-01-2024, it might think the month is December or just fail to recognize it as a date at all, making it impossible to filter by month or year later.
+
+Q6.
+Load Readiness Decision 
+
+a) Direct Load? Absolutely No.
+b) Justification: 
+
+The duplicates will double-count sales.
+The "Three Thousand" text will crash the system.
+The missing values make the data unreliable for any business decision.
+
+
+Q7.
+Pre-Load Validation Checklist 
+Before I even think about hitting "Upload," I’d check for: 
+
+
+Uniqueness: No duplicate Order_IDs.
+
+
+Nulls: No empty cells in required fields.
+
+Data Types: Everything in the Sales column must be a digit.
+
+Date Standards: All dates must match one specific format.
+
+Q8.
+Cleaning Strategy 
+Here’s my plan to fix this: 
+
+
+Remove Duplicates: Delete the second instance of Order_ID 0101.
+
+
+Standardize Values: Manually or programmatically change "Three Thousand" to 3000.
+
+
+Fix Formats: Reformat 2024/01/18 to match the rest of the column.
+
+
+Handle Nulls: Reach out to the source to find the missing Sales_Amount for 0102 or delete the incomplete row.
+
+Q9.
+Loading Strategy Selection 
+
+a) Choice: Incremental Load.
+
+
+b) Why? Since this is daily sales data, we only want to add the new transactions every day. Doing a Full Load (re-uploading everything ever sold) would be a waste of time and computing power as the company grows.
+
+Q10.
+BI Impact Scenario 
+
+a) Incorrect KPI: The "Total Sales" will be completely wrong. It would include the 4500 from 0101 twice, but skip the 3000 from 0104 because it couldn't read the text.
+
+
+b) Misleading Records: 0101 (doubles the money),0102 (zeroes out a sale),and 0104 (ignores a sale).
+
+c) Why BI tools fail to detect this: BI tools are like mirrors—they just reflect what you give them. If the data says "4500" twice, the dashboard assumes there were two sales. It doesn't have the "common sense" to know 0104 was meant to be a number unless we tell it.
