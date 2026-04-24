@@ -72,3 +72,13 @@ ORDER BY amount DESC;
 SELECT * FROM sales 
 WHERE customer_name = 'Aditi';
 
+Q9. What is the Difference Between a Primary Key and a Foreign Key? Primary key - A column (or set of columns) that uniquely identifies every row in a table is known as the primary key. It must be distinct for every record and free of NULL values (e.g., employee_id in the employees table).
+Foreign Key : A column that establishes a relationship between two tables. It connects to the Primary Key of another table. Unlike the Primary Key, a Foreign Key can have duplicate values and NULL values, unless defined differently. It helps maintain referential integrity between the data. 
+Q10. What Are Constraints in SQL and Why Are They Used? 
+Definition: Constraints are rules applied to the data columns of a table. 
+Purpose: They limit the type of data that can be entered into a table. This helps maintain the accuracy and reliability of the data in the database. 
+Common Examples: NOT NULL: This rule ensures a column cannot have a null value. 
+UNIQUE: This rule ensures all values in a column are different. 
+PRIMARY KEY: This is a combination of a NOT NULL and UNIQUE. CHECK: This rule ensures that the values in a column meet a specific condition
+
+
